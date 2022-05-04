@@ -1,4 +1,8 @@
 #pragma once
+/*
+   Shader class
+   - loading Shader source code, Shader Program creation
+*/
 
 #include <string>
 #include <fstream>
@@ -48,6 +52,7 @@ class Shader
             sourceStream << sourceFile.rdbuf();
             //stream.close();
             sourceCode = sourceStream.str();
+            //std::cout << sourceCode;
          }
          catch(const std::exception& e)
          {

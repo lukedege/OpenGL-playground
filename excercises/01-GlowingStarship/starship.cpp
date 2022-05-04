@@ -43,7 +43,7 @@ int main()
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "work01", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Starship", nullptr, nullptr);
     glfwMakeContextCurrent(window);
 
     // Set the required callback functions
@@ -121,7 +121,7 @@ int main()
     glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
 
     // Shaders
-    Shader shader{"01_basic.vert", "01_glow.frag"};
+    Shader shader{"../../shaders/basic.vert", "../../shaders/glow.frag"};
     // Uncommenting this call will result in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     GLint u_time = glGetUniformLocation(shader.program, "u_time");
