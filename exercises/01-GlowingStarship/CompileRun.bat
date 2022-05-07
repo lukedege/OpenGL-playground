@@ -1,3 +1,3 @@
 @echo off
 call MakefileWin.bat
-start starship.exe
+for %%f in (*.exe) do start /b %%f

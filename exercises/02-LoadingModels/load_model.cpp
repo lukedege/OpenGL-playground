@@ -32,6 +32,10 @@ positive Z axis points "outside" the screen
 // GLFW library to create window and to manage I/O
 #include <glfw/glfw3.h>
 
+// GLM for camera
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 // another check related to OpenGL loader
 // confirm that GLAD didn't include windows.h
 #ifdef _WINDOWS_
@@ -82,7 +86,6 @@ int main()
     // we disable the mouse cursor
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
     // GLAD tries to load the context set by GLFW
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
     {
@@ -102,28 +105,55 @@ int main()
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
     // we create and compile shaders (code of Shader class is in include/utils/shader_v1.h)
-    Shader shader("../../shaders/basic.vert", "../../shaders/basic.frag");
+    Shader shader("../../shaders/mvp.vert", "../../shaders/glow.frag");
 
     shader.use();   // <-- Don't forget this one!
 
+    // Load models
     Model cube{"../../models/cube.obj"};
     Model sphere{"../../models/sphere.obj"};
     Model plane{"../../models/plane.obj"};
     Model bunny{"../../models/bunny_lp.obj"};
-    
 
+    // Uncommenting this call will result in wireframe polygons.
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // Setup model-view-projection
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
+
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.f, 0.f, -10.f));
+    
+    glm::mat4 proj = glm::mat4(1.0f);
+    proj = glm::perspective(glm::radians(45.f), static_cast<float>(width/height), 0.1f, 100.f);
+    //proj = glm::ortho(0.f, static_cast<float>(width), 0.f, static_cast<float>(height), 0.1f, 100.f);
+
+    shader.setMat4("u_proj", proj);
+
+    float time = 0.f;
     // Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
     {
         // Check is an I/O event is happening
         glfwPollEvents();
 
-        // we "clear" the frame and z  buffer
+        // we "clear" the frame and z buffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Update uniforms
+        time = static_cast<float>(glfwGetTime());
+        shader.setFloat("u_time", time);
+
+        model = glm::rotate(model, glm::radians(0.01f), glm::vec3(0.5f, 0.f, 0.f)); 
+        shader.setMat4("u_model", model);
+
+        view = glm::lookAt(glm::vec3(20 * sin(time), 0.f, 20 * cos(time)), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+        shader.setMat4("u_view", view);
+        
         // we render the model
-        sphere.draw();
+        bunny.draw();
 
         // Swapping back and front buffers
         glfwSwapBuffers(window);

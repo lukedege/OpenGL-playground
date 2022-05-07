@@ -1,3 +1,3 @@
 @echo off
 call MakefileWin.bat
-start square.exe
+for %%f in (*.exe) do start /b %%f
