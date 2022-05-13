@@ -9,6 +9,9 @@
 #include <sstream>
 #include <iostream>
 
+#include <glm/glm.hpp>
+
+
 class Shader
 {
    public:
@@ -16,8 +19,8 @@ class Shader
 
       Shader(const GLchar* vertPath, const GLchar* fragPath)
       {
-         const GLchar* vertSource = loadSource(vertPath);
-         const GLchar* fragSource = loadSource(fragPath);
+         const std::string vertSource = loadSource(vertPath);
+         const std::string fragSource = loadSource(fragPath);
 
          GLuint vertexShader = compileShader(vertSource, GL_VERTEX_SHADER);
          GLuint fragmentShader = compileShader(fragSource, GL_FRAGMENT_SHADER);
@@ -59,7 +62,7 @@ class Shader
       #pragma endregion 
 
    private:
-      const GLchar* loadSource(const GLchar* sourcePath) const noexcept
+      const std::string loadSource(const GLchar* sourcePath) const noexcept
       {
          std::string         sourceCode;
          std::ifstream       sourceFile;
@@ -71,22 +74,22 @@ class Shader
          {
             sourceFile.open(sourcePath); 
             sourceStream << sourceFile.rdbuf();
-            //stream.close();
+            sourceFile.close();
             sourceCode = sourceStream.str();
-            //std::cout << sourceCode;
          }
          catch(const std::exception& e)
          {
             std::cerr << e.what() << '\n';
          }
 
-         return sourceCode.c_str();
+         return sourceCode;
       }
       
-      GLuint compileShader(const GLchar* shaderSource, GLenum shaderType) const noexcept
+      GLuint compileShader(const std::string& shaderSource, GLenum shaderType) const noexcept
       {
          GLuint shader = glCreateShader(shaderType);
-         glShaderSource(shader, 1, &shaderSource, NULL);
+         const GLchar* c = shaderSource.c_str();
+         glShaderSource(shader, 1, &c, NULL);
          glCompileShader(shader);
          checkCompileErrors(shader);
          return shader;
