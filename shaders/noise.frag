@@ -129,34 +129,34 @@ float aastep(float threshold, float value)
 
 void main()
 {
-    vec4 normal_color = vec4(interp_N, 1);
-    vec4 uv_color     = vec4(interp_UV, 1, 1);
-    
-    float r = u_power * snoise(vec3(interp_UV * u_freq, 1.f * u_time));
-    float g = u_power * snoise(vec3(interp_UV * u_freq, 0.7f * u_time));
-    float b = u_power * snoise(vec3(interp_UV * u_freq, 0.5f * u_time));
-    vec4 animated_noise = vec4(r, g, b, 1);
+  vec4 normal_color = vec4(interp_N, 1);
+  vec4 uv_color     = vec4(interp_UV, 1, 1);
+
+  float r = u_power * snoise(vec3(interp_UV * u_freq, 1.f * u_time));
+  float g = u_power * snoise(vec3(interp_UV * u_freq, 0.7f * u_time));
+  float b = u_power * snoise(vec3(interp_UV * u_freq, 0.5f * u_time));
+  vec4 animated_noise = vec4(r, g, b, 1);
 
 
-    float value = 0;
-    float p = u_power;
-    float f = u_freq;
+  float value = 0;
+  float p = u_power;
+  float f = u_freq;
 
-    for(int i = 0; i < u_harmonics; i++)
-    {
-        value += p * snoise(vec3(interp_UV*f, 0));
-        p *= 0.5; f *= 2;
-    }
+  for(int i = 0; i < u_harmonics; i++)
+  {
+    value += p * snoise(vec3(interp_UV*f, 0));
+    p *= 0.5; f *= 2;
+  }
 
-    value = aastep(0.05, value);
+  value = aastep(0.05, value);
 
-    vec4 smooth_noise = vec4(vec3(value), 1);
+  vec4 smooth_noise = vec4(vec3(value), 1);
 
-    // discard the fragment if condition is met (the frag will be transparent)
-    if(value < 0.5f)
-        discard;
+  // discard the fragment if condition is met (the frag will be transparent)
+  if(value < 0.5f)
+    discard;
 
-    vec4 clouds = vec4(vec3(value), 1);
+  vec4 clouds = vec4(vec3(value), 1);
 
-    color = smooth_noise;
+  color = smooth_noise;
 }

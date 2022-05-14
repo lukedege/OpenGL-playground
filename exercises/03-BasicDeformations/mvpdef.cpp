@@ -62,8 +62,8 @@ GLfloat spin_speed = 30.f;
 GLboolean spin = GL_FALSE;
 GLboolean wire = GL_FALSE;
 
-GLfloat sky_color[] = {1, 0, 0};
-GLfloat my_color[] = {1, 0, 0};
+glm::vec3 sky_color{0,0,0};
+glm::vec3 my_color{0,0,0};
 GLfloat weight = 0.2f;
 GLfloat speed  = 5.0f;
 
@@ -75,8 +75,10 @@ void setup_model(Shader shader, const glm::mat4& view, glm::mat4& model, glm::ma
 {
     norm = glm::inverseTranspose(glm::mat3(view * model));
 
-    glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_model"), 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_norm" ), 1, GL_FALSE, glm::value_ptr(norm));
+    //glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_model"), 1, GL_FALSE, glm::value_ptr(model));
+    //glUniformMatrix3fv(glGetUniformLocation(shader.program, "u_norm"), 1, GL_FALSE, glm::value_ptr(view));
+    shader.setMat4("u_model", model);
+    shader.setMat3("u_norm", norm);
 }
 
 /////////////////// MAIN function ///////////////////////
@@ -133,7 +135,7 @@ int main()
     //glClearColor(0.05f, 0.05f, 0.05f, 1.0f);   // black
 
     // we create and compile shaders (code of Shader class is in include/utils/shader.h)
-    Shader shader("../../shaders/deform.vert", "../../shaders/noise.frag");
+    Shader shader("../../shaders/deform.vert", "../../shaders/uvs.frag");
 
     // we load the model(s) (code of Model class is in include/utils/model.h)
     Model cube  ("../../models/cube.obj"  );
@@ -176,8 +178,10 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // setting up uniforms
-        glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_proj"), 1, GL_FALSE, glm::value_ptr(proj));
-        glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_view"), 1, GL_FALSE, glm::value_ptr(view));
+        shader.setMat4("u_proj", proj);
+        shader.setMat4("u_view", view);
+        //glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_proj"), 1, GL_FALSE, glm::value_ptr(proj));
+        //glUniformMatrix4fv(glGetUniformLocation(shader.program, "u_view"), 1, GL_FALSE, glm::value_ptr(view));
 
         if(wire)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -189,8 +193,15 @@ int main()
         else
             orientation_y = 0;
 
-        GLint frag_color_location = glGetUniformLocation(shader.program, "u_color_in");
-        glUniform3fv(frag_color_location, 1, my_color);
+        shader.setVec3("u_color_in", my_color);
+        shader.setFloat("u_weight", weight);
+        shader.setFloat("u_time", currentFrame * speed);
+        shader.setFloat("u_freq", frequency);
+        shader.setFloat("u_power", power);
+        shader.setFloat("u_harmonics", harmonics);
+        /*/
+        GLint color_location = glGetUniformLocation(shader.program, "u_color");
+        glUniform3fv(color_location, 1, &my_color[0]);
 
         GLint weight_location = glGetUniformLocation(shader.program, "u_weight");
         glUniform1f(weight_location, weight);
@@ -205,7 +216,7 @@ int main()
         glUniform1f(power_location, power);
 
         GLint harm_location = glGetUniformLocation(shader.program, "u_harmonics");
-        glUniform1f(harm_location, harmonics);
+        glUniform1f(harm_location, harmonics);*/
 
         // cube
         cube_model_mat = glm::rotate(cube_model_mat, orientation_y, glm::vec3(0, 1, 0));
