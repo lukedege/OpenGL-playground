@@ -10,13 +10,6 @@ N.B. 3) we use simplex noise implementation from
         https://github.com/stegu/webgl-noise//wiki
         to generate the fragments colors
 
-
-author: Davide Gadia
-
-Real-Time Graphics Programming - a.a. 2021/2022
-Master degree in Computer Science
-Universita' degli Studi di Milano
-
 */
 
 #version 410 core

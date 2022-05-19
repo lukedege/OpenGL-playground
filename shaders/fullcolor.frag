@@ -4,12 +4,6 @@
 
 N.B.)  "00_basic.vert" must be used as vertex shader
 
-author: Davide Gadia
-
-Real-Time Graphics Programming - a.a. 2021/2022
-Master degree in Computer Science
-Universita' degli Studi di Milano
-
 */
 
 #version 410 core

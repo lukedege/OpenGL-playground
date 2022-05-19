@@ -2,12 +2,6 @@
 
 06_procedural_base.vert: Vertex shader for the examples on procedural texturing. It is equal to 05_uv2color.vert
 
-author: Davide Gadia
-
-Real-Time Graphics Programming - a.a. 2021/2022
-Master degree in Computer Science
-Universita' degli Studi di Milano
-
 */
 
 #version 410 core
