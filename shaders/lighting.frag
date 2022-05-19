@@ -5,6 +5,8 @@ const float PI = 3.14159265359;
 // output shader variable
 out vec4 colorFrag;
 
+// TODO STRUCTS FOR MULTIPLE LIGHTS SETUP
+
 // light incidence direction (calculated in vertex shader, interpolated by rasterization)
 in vec3 lightDir;
 // the transformed normal has been calculated per-vertex in the vertex shader

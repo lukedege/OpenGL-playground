@@ -45,6 +45,7 @@ positive Z axis points "outside" the screen
 #include <utils/model.h>
 #include <utils/camera.h>
 #include <utils/object.h>
+#include <utils/light.h>
 
 // we load the GLM classes used in the application
 #include <glm/glm.hpp>
