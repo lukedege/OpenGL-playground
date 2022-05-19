@@ -35,7 +35,7 @@ class Model
 
       Model(const std::string& path) { loadModel(path); }
 
-      void draw()
+      void draw() const
       {
          for (size_t i = 0; i < meshes.size(); i++) { meshes[i].draw(); }
       }

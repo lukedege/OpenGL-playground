@@ -59,7 +59,7 @@ class Mesh
          freeGPU();
       }
 
-      void draw()
+      void draw() const
       {
          glBindVertexArray(VAO);
          glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
