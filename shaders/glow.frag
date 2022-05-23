@@ -1,6 +1,7 @@
 // Fragment shader
 // The output of a fragment shader is the color of the generated fragments
-#version 410 core
+// #version 410 core
+
 out vec4 color;
 
 uniform float u_time;

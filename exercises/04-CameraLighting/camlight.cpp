@@ -53,6 +53,9 @@ positive Z axis points "outside" the screen
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// OpenGL version
+GLuint glMajor = 4, glMinor = 1;
+
 // dimensions of application's window
 GLuint screenWidth = 1200, screenHeight = 900;
 
@@ -126,8 +129,8 @@ int main()
   // If not supported by your graphics HW, the context will not be created and the application will close
   // N.B.) creating GLAD code to load extensions, try to take into account the specifications and any extensions you want to use,
   // in relation also to the values indicated in these GLFW commands
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, glMajor);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, glMinor);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   // we set if the window is resizable
@@ -169,10 +172,10 @@ int main()
     glClearColor(0.26f, 0.46f, 0.98f, 1.0f);
 
     // we create the Shader Program used for the plane
-    Shader base_shader("../../shaders/basic.vert", "../../shaders/fullcolor.frag");
+    Shader base_shader("../../shaders/basic.vert", "../../shaders/fullcolor.frag", {"../../shaders/types.utils", "../../shaders/constants.utils"}, 4, 1);
 
     // we create the Shader Program used for objects (which presents different subroutines we can switch)
-    Shader light_shader = Shader("../../shaders/procedural_base.vert", "../../shaders/lighting.frag");
+    Shader light_shader = Shader("../../shaders/procedural_base.vert", "../../shaders/lighting.frag", {"../../shaders/types.utils", "../../shaders/constants.utils"}, 4, 1);
     // we parse the Shader Program to search for the number and names of the subroutines.
     // the names are placed in the shaders vector
     SetupShader(light_shader.program);

@@ -12,9 +12,7 @@ N.B. 3) we use simplex noise implementation from
 
 */
 
-#version 410 core
-
-const float PI = 3.1415926535897932384626433832795;
+// #version 410 core
 
 // output shader variable
 out vec4 colorFrag;

@@ -1,17 +1,15 @@
-#version 410 core
-
-const float PI = 3.14159265359;
+// #version 410 core
 
 // output shader variable
 out vec4 colorFrag;
 
-// TODO STRUCTS FOR MULTIPLE LIGHTS SETUP
+//in LightIncidence li;
 
 // light incidence direction (calculated in vertex shader, interpolated by rasterization)
 in vec3 lightDir;
 // the transformed normal has been calculated per-vertex in the vertex shader
 in vec3 vNormal;
-// vector from fragment to camera (in view coordinate)
+// vector from vertex to camera (in view coordinate)
 in vec3 vViewPosition;
 
 // ambient, diffusive and specular components (passed from the application)

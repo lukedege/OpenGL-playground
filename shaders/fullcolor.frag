@@ -6,7 +6,7 @@ N.B.)  "00_basic.vert" must be used as vertex shader
 
 */
 
-#version 410 core
+// #version 410 core
 
 // output shader variable
 out vec4 colorFrag;

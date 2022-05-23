@@ -4,7 +4,7 @@
 
 */
 
-#version 410 core
+// #version 410 core
 
 // vertex position in world coordinates
 layout (location = 0) in vec3 position;
@@ -25,6 +25,19 @@ uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
 
 //Lights
+#define MAX_POINT_LIGHTS 3 
+#define MAX_SPOT_LIGHTS 3   
+#define MAX_DIR_LIGHTS 3 
+#define MAX_LIGHTS MAX_POINT_LIGHTS+MAX_SPOT_LIGHTS+MAX_DIR_LIGHTS
+
+uniform uint nPointLights = 1;
+uniform uint nDirLights = 0;
+uniform uint nSpotLights = 0;
+
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+
+out LightIncidence li[MAX_LIGHTS];
+
 uniform vec3 pointLightPosition;
 
 out vec3 lightDir; // we calculate per-vertex the direction of the light coming from the point light source
@@ -36,6 +49,7 @@ out vec2 interp_UV;
 
 void main()
 {
+	
 	// I assign the values to a variable with "out" qualifier so to use the per-fragment interpolated values in the Fragment shader
 	interp_UV = UV;
 
