@@ -3,24 +3,22 @@
 // output shader variable
 out vec4 colorFrag;
 
-//in LightIncidence li;
+uniform uint nPointLights;
+uniform uint nDirLights;
+uniform uint nSpotLights;
 
-// light incidence direction (calculated in vertex shader, interpolated by rasterization)
-in vec3 lightDir;
-// the transformed normal has been calculated per-vertex in the vertex shader
-in vec3 vNormal;
-// vector from vertex to camera (in view coordinate)
-in vec3 vViewPosition;
+uniform 	PointLight 		    pointLights[MAX_POINT_LIGHTS];
+in 		    LightIncidence 	    pointLI[MAX_POINT_LIGHTS];
 
-// ambient, diffusive and specular components (passed from the application)
-uniform vec3 ambientColor;
-uniform vec3 diffuseColor;
-uniform vec3 specularColor;
-// weight of the components
-// in this case, we can pass separate values from the main application even if Ka+Kd+Ks>1. In more "realistic" situations, I have to set this sum = 1, or at least Kd+Ks = 1, by passing Kd as uniform, and then setting Ks = 1.0-Kd
-uniform float Ka;
-uniform float Kd;
-uniform float Ks;
+uniform 	DirectionalLight 	directionalLights[MAX_DIR_LIGHTS];
+in 		    LightIncidence 	    dirLI[MAX_DIR_LIGHTS];
+
+uniform 	SpotLight 			spotLights[MAX_SPOT_LIGHTS];
+in 		    LightIncidence 	    spotLI[MAX_SPOT_LIGHTS];
+
+// parameters for current light calc
+LightAttributes currLA;
+LightIncidence  currLI;
 
 // shininess coefficients (passed from the application)
 uniform float shininess;
@@ -45,15 +43,15 @@ subroutine(illum_model)
 vec3 Lambert() // this name is the one which is detected by the SetupShaders() function in the main application, and the one used to swap subroutines
 {
     // normalization of the per-fragment normal
-    vec3 N = normalize(vNormal);
+    vec3 N = normalize(currLI.vNormal);
     // normalization of the per-fragment light incidence direction
-    vec3 L = normalize(lightDir);
+    vec3 L = normalize(currLI.lightDir);
 
     // Lambert coefficient
     float lambertian = max(dot(L,N), 0.0);
 
     // Lambert illumination model
-    return vec3(Kd * lambertian * diffuseColor);
+    return vec3(currLA.kD * lambertian * currLA.diffuse);
 }
 //////////////////////////////////////////
 
@@ -63,13 +61,13 @@ subroutine(illum_model)
 vec3 Phong() // this name is the one which is detected by the SetupShaders() function in the main application, and the one used to swap subroutines
 {
     // ambient component can be calculated at the beginning
-    vec3 color = Ka*ambientColor;
+    vec3 color = currLA.kA * currLA.ambient;
 
     // normalization of the per-fragment normal
-    vec3 N = normalize(vNormal);
+    vec3 N = normalize(currLI.vNormal);
 
     // normalization of the per-fragment light incidence direction
-    vec3 L = normalize(lightDir);
+    vec3 L = normalize(currLI.lightDir);
 
     // Lambert coefficient
     float lambertian = max(dot(L,N), 0.0);
@@ -78,7 +76,7 @@ vec3 Phong() // this name is the one which is detected by the SetupShaders() fun
     if(lambertian > 0.0)
     {
       // the view vector has been calculated in the vertex shader, already negated to have direction from the mesh to the camera
-      vec3 V = normalize( vViewPosition );
+      vec3 V = normalize( currLI.vViewPosition );
 
       // reflection vector
       vec3 R = reflect(-L, N);
@@ -90,8 +88,8 @@ vec3 Phong() // this name is the one which is detected by the SetupShaders() fun
 
       // We add diffusive and specular components to the final color
       // N.B. ): in this implementation, the sum of the components can be different than 1
-      color += vec3( Kd * lambertian * diffuseColor +
-                      Ks * specular * specularColor);
+      color += vec3( currLA.kD * lambertian * currLA.diffuse +
+                     currLA.kS * specular   * currLA.specular);
     }
     return color;
 }
@@ -103,13 +101,13 @@ subroutine(illum_model)
 vec3 BlinnPhong() // this name is the one which is detected by the SetupShaders() function in the main application, and the one used to swap subroutines
 {
     // ambient component can be calculated at the beginning
-    vec3 color = Ka*ambientColor;
+    vec3 color = currLA.kA * currLA.ambient;
 
     // normalization of the per-fragment normal
-    vec3 N = normalize(vNormal);
+    vec3 N = normalize(currLI.vNormal);
 
     // normalization of the per-fragment light incidence direction
-    vec3 L = normalize(lightDir);
+    vec3 L = normalize(currLI.lightDir);
 
     // Lambert coefficient
     float lambertian = max(dot(L,N), 0.0);
@@ -118,7 +116,7 @@ vec3 BlinnPhong() // this name is the one which is detected by the SetupShaders(
     if(lambertian > 0.0)
     {
       // the view vector has been calculated in the vertex shader, already negated to have direction from the mesh to the camera
-      vec3 V = normalize( vViewPosition );
+      vec3 V = normalize( currLI.vViewPosition );
 
       // in the Blinn-Phong model we do not use the reflection vector, but the half vector
       vec3 H = normalize(L + V);
@@ -130,8 +128,8 @@ vec3 BlinnPhong() // this name is the one which is detected by the SetupShaders(
 
       // We add diffusive and specular components to the final color
       // N.B. ): in this implementation, the sum of the components can be different than 1
-      color += vec3( Kd * lambertian * diffuseColor +
-                      Ks * specular * specularColor);
+      color += vec3( currLA.kD * lambertian * currLA.diffuse +
+                     currLA.kS * specular   * currLA.specular);
     }
     return color;
 }
@@ -158,15 +156,15 @@ subroutine(illum_model)
 vec3 GGX() // this name is the one which is detected by the SetupShaders() function in the main application, and the one used to swap subroutines
 {
     // normalization of the per-fragment normal
-    vec3 N = normalize(vNormal);
+    vec3 N = normalize(currLI.vNormal);
     // normalization of the per-fragment light incidence direction
-    vec3 L = normalize(lightDir);
+    vec3 L = normalize(currLI.lightDir);
 
     // cosine angle between direction of light and normal
     float NdotL = max(dot(N, L), 0.0);
 
     // diffusive (Lambert) reflection component
-    vec3 lambert = (Kd*diffuseColor)/PI;
+    vec3 lambert = (currLA.kD * currLA.diffuse)/PI;
 
     // we initialize the specular component
     vec3 specular = vec3(0.0);
@@ -175,7 +173,7 @@ vec3 GGX() // this name is the one which is detected by the SetupShaders() funct
     if(NdotL > 0.0)
     {
         // the view vector has been calculated in the vertex shader, already negated to have direction from the mesh to the camera
-        vec3 V = normalize( vViewPosition );
+        vec3 V = normalize( currLI.vViewPosition );
 
         // half vector
         vec3 H = normalize(L + V);
@@ -196,7 +194,7 @@ vec3 GGX() // this name is the one which is detected by the SetupShaders() funct
         // GGX Distribution
         float D = alpha_Squared;
         float denom = (NdotH_Squared*(alpha_Squared-1.0)+1.0);
-        D /= PI*denom*denom;
+        D /= 1;//PI*denom*denom;
 
         // Fresnel reflectance F (approx Schlick)
         vec3 F = vec3(pow(1.0 - VdotH, 5.0));
@@ -215,12 +213,51 @@ vec3 GGX() // this name is the one which is detected by the SetupShaders() funct
 }
 //////////////////////////////////////////
 
+vec3 calcPointLights()
+{
+    vec3 color = vec3(0);
+
+    for(int i = 0; i < nPointLights; i++)
+    {
+        currLA = pointLights[i].lightAttrs;
+        currLI = pointLI[i];
+        color += Illumination_Model();
+    }
+
+    return color;
+}
+
+vec3 calcDirLights()
+{
+    vec3 color = vec3(0);
+
+    // TODO
+
+    return color;
+}
+
+vec3 calcSpotLights()
+{
+    vec3 color = vec3(0);
+
+    // TODO
+
+    return color;
+}
+
 // main
 void main(void)
 {
     // we call the pointer function Illumination_Model():
     // the subroutine selected in the main application will be called and executed
-  	vec3 color = Illumination_Model();
+    vec3 color = vec3(0);
+    
+    color += calcPointLights();
+    color += calcDirLights();
+    color += calcSpotLights();
+      
+    
+    //vec3 color = Illumination_Model();
 
     colorFrag = vec4(color, 1.0);
 }

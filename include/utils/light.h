@@ -12,10 +12,10 @@ struct LightAttributes
    glm::vec3 diffuse;
    glm::vec3 specular;
 
-   // Decay values
-   float constant;
-   float linear;
-   float quadratic;
+   // Multipliers 
+   float kA;
+   float kD;
+   float kS;
 };
 
 class Light
@@ -27,13 +27,13 @@ class Light
 
       virtual void setLightAttrs(Shader shader, std::string &prefix)
       {
-         shader.setVec3(prefix + "diffuseColor", attrs.diffuse);
-         shader.setVec3(prefix + "specularColor", attrs.specular);
-         shader.setVec3(prefix + "ambientColor", attrs.ambient);
+         shader.setVec3(prefix + "lightAttrs.diffuse", attrs.diffuse);
+         shader.setVec3(prefix + "lightAttrs.specular", attrs.specular);
+         shader.setVec3(prefix + "lightAttrs.ambient", attrs.ambient);
 
-         shader.setFloat(prefix + "constant", attrs.constant);
-         shader.setFloat(prefix + "linear", attrs.linear);
-         shader.setFloat(prefix + "quadratic", attrs.quadratic);
+         shader.setFloat(prefix + "lightAttrs.kA", attrs.kA);
+         shader.setFloat(prefix + "lightAttrs.kD", attrs.kD);
+         shader.setFloat(prefix + "lightAttrs.kS", attrs.kS);
       }
       virtual void setup(Shader shader, size_t index) = 0;
 };
@@ -42,6 +42,11 @@ class PointLight : Light
 {
    public:
       glm::vec3 position;
+
+      /* Decay values TODO LATER
+      float constant    = 1.f;
+      float linear      = 1.f;
+      float quadratic   = 1.f;*/
 
       PointLight(glm::vec3 position, LightAttributes &attrs) :
          Light(attrs), position(position) {}

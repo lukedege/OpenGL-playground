@@ -118,7 +118,7 @@ class Shader
 
          const std::string finalSource = mergedSource;
 
-         std::cout << finalSource << std::endl;
+         //std::cout << finalSource << std::endl;
 
          // Shader creation
          GLuint shader = glCreateShader(shaderType);

@@ -102,9 +102,9 @@ GLfloat mov_light_speed = 3.f;
 //for a directional light we need to specify another vec3 for position; 
 //for a colored light we need to specify another vec3 for color
 
-GLfloat diffuseColor[] = {1.f, 0.f, 0.f};
-GLfloat specularColor[] = {1.f, 1.f, 1.f};
-GLfloat ambientColor[] = {0.1f, 0.1f, 0.1f};
+GLfloat diffuseColor[]  = {1.0f, 0.0f, 0.0f};
+GLfloat specularColor[] = {1.0f, 1.0f, 1.0f};
+GLfloat ambientColor[]  = {0.1f, 0.1f, 0.1f};
 
 // Generally we'd like a normalized sum of these coefficients Kd + Ks + Ka = 1
 GLfloat Kd = 0.5f;
@@ -196,6 +196,17 @@ int main()
     // Setup objects
     Object plane{planeModel}, sphere{sphereModel}, cube{cubeModel}, bunny{bunnyModel};
 
+    // Setup lights
+    glm::vec3 ambient {0.1f, 0.1f, 0.1f}, diffuse{1.0f, 0.0f, 0.0f}, specular{1.0f, 1.0f, 1.0f};
+    //GLfloat kA, kD, kS;
+    LightAttributes la {ambient, diffuse, specular, Ka, Kd, Ks};
+    PointLight pl1{glm::vec3{20.f, 10.f, 10.f}, la};
+    PointLight pl2{glm::vec3{-20.f, 10.f, 10.f}, la};
+
+    std::vector<PointLight> pls {};
+    pls.emplace_back(pl1);
+    pls.emplace_back(pl2);
+
     // Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
     {
@@ -228,17 +239,15 @@ int main()
         // We render a plane under the objects. We apply the fullcolor shader to the plane, and we do not apply the rotation applied to the other objects.
         light_shader.use();
 
+        light_shader.setUint("nPointLights", pls.size());
+        for(size_t i = 0; i < pls.size(); i++)
+        {
+            pls[i].setup(light_shader, i);
+        }
+
         GLuint index = glGetSubroutineIndex(light_shader.program, GL_FRAGMENT_SHADER, "Lambert");
         // we activate the subroutine using the index (this is where shaders swapping happens)
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
-
-        // we pass projection and view matrices to the Shader Program of the plane
-        light_shader.setMat4("projectionMatrix", projection);
-        light_shader.setMat4("viewMatrix", view);
-
-        light_shader.setVec3("pointLightPosition", lightPos0);
-        light_shader.setVec3("diffuseColor", diffuseColor);
-        light_shader.setFloat("Kd", Kd);
 
         // we create the transformation matrix
         plane.translate(glm::vec3(0.0f, -1.0f, 0.0f));
@@ -254,12 +263,6 @@ int main()
         index = glGetSubroutineIndex(light_shader.program, GL_FRAGMENT_SHADER, shaders[current_subroutine].c_str());
         // we activate the subroutine using the index (this is where shaders swapping happens)
         glUniformSubroutinesuiv( GL_FRAGMENT_SHADER, 1, &index);
-
-        // we determine the position in the Shader Program of the uniform variables
-        light_shader.setVec3("ambientColor", ambientColor);
-        light_shader.setVec3("specularColor", specularColor);
-        light_shader.setFloat("Ks", Ks);
-        light_shader.setFloat("Ka", Ka);
 
         light_shader.setFloat("shininess", shininess);
         light_shader.setFloat("alpha", alpha);
